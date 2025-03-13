@@ -1,0 +1,468 @@
+---
+title: "Hands-on Session: Reconstructing Past Social Networks from Inscriptions"
+author: 
+- Petra Hermankova^[Aarhus University, Denmark, https://orcid.org/0000-0002-6349-0540]
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: united
+    toc: yes
+    toc_float: true
+    number_sections: true
+    toc_depth: 3
+    df_print: paged
+---
+_Event: Epigraphy.info IX, 2-4 April 2025, Aarhus, Denmark. See https://epigraphy.info/workshop_9/ for details._
+
+This script demonstrates how to convert a real Latin inscription into a network using the famous Rabirii inscription from Via Appia (EDR103440: http://www.edr-edr.it/edr_programmi/res_complex_comune.php?do=book&id_nr=EDR103440).
+
+# Initial setup
+
+```{r setup, echo=TRUE, message=FALSE, warning = FALSE}
+
+# Install required packages if not already installed
+if (!requireNamespace("igraph", quietly = TRUE)) install.packages("igraph")
+if (!requireNamespace("dplyr", quietly = TRUE)) install.packages("dplyr")
+if (!requireNamespace("ggplot2", quietly = TRUE)) install.packages("ggplot2")
+if (!requireNamespace("ggraph", quietly = TRUE)) install.packages("ggraph")
+if (!requireNamespace("networkD3", quietly = TRUE)) install.packages("networkD3")
+
+# Load required libraries
+library(igraph)      # For network creation and analysis
+library(dplyr)       # For data manipulation
+library(ggplot2)     # For visualization
+library(ggraph)      # For advanced network visualization
+library(networkD3)   # For interactive visualization
+
+```
+
+# The inscription and its context
+
+**Information source**: EDR103440: http://www.edr-edr.it/edr_programmi/res_complex_comune.php?do=book&id_nr=EDR103440
+
+**CIL number**: CIL 6.2246. 
+
+**Description**: Funerary monument, with portrait relief, for Gaius Rabirius Hermodorus, Rabiria Demaris, and Usia Prima, a priestess of Isis. Dated between 50 BC / 40 BC (archaeological context and palaeography, EDR).
+
+**Images**:
+```{r, echo=FALSE, out.width="80%", fig.align="center"}
+# image from EDR
+knitr::include_graphics("http://www.edr-edr.it/foto_epigrafi/immagini_uso/103/103440.jpg?dummy=1741855097")
+# image from Center for Epigraphical and Paleographical Studies - Ohio State University http://hdl.handle.net/1811/100838
+knitr::include_graphics("../images/CIL_6_2246_1.jpg")   
+
+```
+
+
+**Latin text of the inscription**:
+(as recorded in EDR, including the Leiden markup)
+
+〈:columna I〉
+C(aius) Rabirius Post(umi) l(ibertus)
+Hermodorus.
+
+〈:columna II〉
+Rabiria
+Demaris.
+
+〈:columna III〉
+《Usia Prima, sac(erdos)》
+《Isidis》.
+
+
+```{r}
+# Latin text of the inscription (actual text from EDR103440):
+latin_text <- "〈:columna I〉
+C(aius) Rabirius Post(umi) l(ibertus)
+Hermodorus.
+〈:columna II〉
+Rabiria
+Demaris.
+〈:columna III〉
+《Usia Prima, sac(erdos)》
+《Isidis》."
+
+english_translation <- "Gaius Rabirius Hermodorus, freedman of Postumus, Rabiria Demaris, Usia Prima, priestess of Isis"
+
+```
+
+# Identify people and relationships
+
+## Step 1: Identify individuals mentioned in the inscription
+```{r}
+# Let's identify each person and assign them an ID
+
+people <- data.frame(
+  id = 1:4,
+  name = c("Gaius Rabirius Hermodorus", 
+           "Postumus Rabirius", 
+           "Rabiria Demaris", 
+           "Usia Prima"),
+  gender = c("male", "male", "female", "female"),
+  role = c("freedman", "former master", "wife", "priestess"),
+  status = c("freedman", "freeborn", "unknown", "unknown"),
+  additional_info = c("", "", "", "priestess of Isis"),
+  stringsAsFactors = FALSE
+)
+
+# Print the people we've identified
+print(people)
+
+```
+
+## Step 2: Identify relationships between these individuals
+```{r}
+
+relationships <- data.frame(
+  from = c(1, 2, 1, 4),
+  to = c(2, 1, 3, NA),
+  relationship = c("freedman_of", "patron_of", "partner_of", "priestess_of_deity"),
+  certainty = c("certain", "certain", "uncertain", "certain"),
+  additional_info = c("", "", "possibly family members", "priestess of Isis"),
+  stringsAsFactors = FALSE
+)
+
+# Print the relationships we've identified
+print(relationships)
+
+```
+
+
+## Step 3: Create the network
+
+```{r}
+
+# Remove NA relationships for network creation
+relationships_clean <- relationships %>% 
+  filter(!is.na(to))
+
+# Create the graph/network object
+inscription_network <- graph_from_data_frame(relationships_clean, directed = TRUE, vertices = people)
+
+# Print basic network information
+print(inscription_network)
+
+```
+
+## Step 4: Basic visualization
+
+```{r}
+
+cat("\nStep 4: Visualizing the network\n")
+
+# Set plot parameters
+par(mar = c(0, 0, 2, 0))  # Adjust margins for better visualization
+
+# Plot the network
+plot(inscription_network, 
+     vertex.label = V(inscription_network)$name,
+     vertex.color = ifelse(V(inscription_network)$gender == "male", "blue", "red"),
+     vertex.size = 20,
+     vertex.label.cex = 0.9,
+     edge.arrow.size = 0.5,
+     edge.label = E(inscription_network)$relationship,
+     edge.label.cex = 0.9,
+     layout = layout_with_fr(inscription_network),
+     main = "Network from EDR103440 Inscription")
+
+```
+
+## Step 5: Advanced visualization with ggraph
+
+```{r}
+
+# Create a more sophisticated visualization
+inscription_plot <- ggraph(inscription_network, layout = 'fr') + 
+  geom_edge_link(aes(label = relationship, 
+                     color = certainty), 
+                 arrow = arrow(length = unit(4, 'mm')), 
+                 end_cap = circle(5, 'mm'),
+                 angle_calc = 'along',
+                 label_size = 3) + 
+  geom_node_point(aes(color = gender, size = 5)) + 
+  geom_node_text(aes(label = name), repel = TRUE, size = 3.5) +
+  scale_edge_color_manual(values = c("certain" = "black", "uncertain" = "gray90")) +
+  scale_color_manual(values = c("male" = "blue", "female" = "red")) +
+  theme_graph() +
+  ggtitle("Social Relations in EDR103440 Inscription") +
+  theme(legend.position = "bottom")
+
+# Print the plot
+print(inscription_plot)
+```
+
+
+# More complex data - family ties
+
+Using AI (Claude.ai) generated dataset of 74 individuals and their family ties from a ficticious corpus called INS.
+
+**Dataset Structure**:
+
+- Basic Information: Names (praenomen, nomen, cognomen), family ID, birth/death years, gender
+- Family Connections: Father, mother, spouse, and patron IDs
+- Social Context: Status (patrician/plebeian)
+- Archaeological Data: Inscription ID, location, and type
+
+**The Three Families**:
+
+- Valerii (family_id 1): A patrician family with branches in Rome, Ostia, Pompeii and Herculaneum
+- Cornelii (family_id 2): A prominent patrician family centered in Rome and Capua
+- Tullii (family_id 3): A family with both patrician and plebeian members, primarily in Rome
+
+**Interconnections**:
+
+- Marriage alliances between families (example: person 53, Valeria Messalina, connects the Valerii to the Cornelii)
+- Multiple generations (spanning approximately 200 years)
+- Various inscription types (funerary, honorary, votive)
+
+
+## Load the data
+```{r}
+# Load necessary libraries
+library(igraph)
+library(dplyr)
+library(readr)
+library(ggplot2)
+```
+
+```{r}
+# Read the CSV data
+  family <- read.csv("../data/latin-inscriptions-family-data.txt", stringsAsFactors = FALSE)
+```
+
+```{r}
+# display the data
+family
+```
+
+## Process the data
+
+```{r}
+# Clean up the data - replace NA strings with actual NA values
+family[family == "NA"] <- NA
+
+```
+
+```{r}
+# Create family relationships dataframe
+relationships <- data.frame(
+  from = character(),
+  to = character(),
+  relation = character(),
+  stringsAsFactors = FALSE
+)
+
+# Add parent-child relationships
+# Father-child
+father_child <- family %>%
+  filter(!is.na(father_id)) %>%
+  select(father_id, person_id)
+father_child$relation <- "parent"
+names(father_child) <- c("from", "to", "relation")
+
+# Mother-child
+mother_child <- family %>%
+  filter(!is.na(mother_id)) %>%
+  select(mother_id, person_id)
+mother_child$relation <- "parent"
+names(mother_child) <- c("from", "to", "relation")
+
+# Spouse relationships
+spouse <- family %>%
+  filter(!is.na(spouse_id) & person_id < spouse_id) %>%
+  select(person_id, spouse_id)
+spouse$relation <- "spouse"
+names(spouse) <- c("from", "to", "relation")
+
+# Combine all relationships
+relationships <- rbind(relationships, father_child, mother_child, spouse)
+
+# Create a lookup table for person names
+person_lookup <- family %>%
+  mutate(full_name = paste(praenomen, nomen, cognomen)) %>%
+  select(person_id, full_name, family_id, gender, birth_year, death_year)
+
+person_lookup
+```
+
+## Visualise the data
+
+Main Network Visualization shows all three families with their interconnections, using:
+- Different colors for each family (Valerii in blue, Cornelii in green, Tullii in salmon)
+- Different shapes for gender (squares for males, circles for females)
+- Different line styles for relationship types (gray for parent-child, red for spouse
+
+The visualizations use the Fruchterman-Reingold layout algorithm, which works well for family networks as it tends to place connected nodes closer together.
+
+```{r}
+# Create the network graph
+g <- graph_from_data_frame(d = relationships, vertices = person_lookup, directed = TRUE)
+
+# Set vertex attributes
+V(g)$color <- ifelse(V(g)$family_id == 1, "skyblue", 
+                    ifelse(V(g)$family_id == 2, "lightgreen", "salmon"))
+V(g)$shape <- ifelse(V(g)$gender == "M", "square", "circle")
+V(g)$size <- 10
+V(g)$label <- V(g)$full_name
+V(g)$label.cex <- 0.7
+
+# Set edge attributes
+E(g)$color <- ifelse(E(g)$relation == "parent", "gray", "red")
+E(g)$width <- ifelse(E(g)$relation == "parent", 1, 2)
+E(g)$arrow.size <- 0.5
+
+# Create a layout that works well for family networks
+layout_family <- layout_with_fr(g)
+
+# Plot the graph
+plot(g, 
+     layout = layout_family,
+     vertex.label.dist = 0.5,
+     vertex.label.color = "black",
+     vertex.label.family = "sans",
+     vertex.label.degree = -pi/2,
+     edge.curved = 0.2,
+     main = "[Ficticious] Latin Family Network from Inscriptions")
+
+# Add a legend
+legend("bottomleft", 
+       legend = c("Valerii (Family 1)", "Cornelii (Family 2)", "Tullii (Family 3)", "Male", "Female", "Parent-Child", "Spouse"),
+       pch = c(15, 15, 15, 0, 1, NA, NA),
+       lty = c(NA, NA, NA, NA, NA, 1, 1),
+       lwd = c(NA, NA, NA, NA, NA, 1, 2),
+       col = c("skyblue", "lightgreen", "salmon", "black", "black", "gray", "red"),
+       pt.cex = 2,
+       cex = 0.8,
+       bty = "n")
+```
+## Focus on one family
+
+Cornelii Family Focus: A more detailed view of just the Cornelii family and their marriage connections to other families.
+```{r}
+# For example, let's focus on the Cornelii (family_id 2)
+
+# Filter for just family 2
+cornelii_ids <- family %>% 
+  filter(family_id == 2) %>% 
+  pull(person_id)
+
+# Get all relationships involving Cornelii
+cornelii_relations <- relationships %>%
+  filter(from %in% cornelii_ids | to %in% cornelii_ids)
+
+# Create the subgraph
+g_cornelii <- graph_from_data_frame(d = cornelii_relations, 
+                                   vertices = person_lookup %>% filter(person_id %in% unique(c(cornelii_relations$from, cornelii_relations$to))), 
+                                   directed = TRUE)
+
+# Set vertex attributes for the Cornelii subgraph
+V(g_cornelii)$color <- ifelse(V(g_cornelii)$family_id == 2, "lightgreen", 
+                             ifelse(V(g_cornelii)$family_id == 1, "skyblue", "salmon"))
+V(g_cornelii)$shape <- ifelse(V(g_cornelii)$gender == "M", "square", "circle")
+V(g_cornelii)$size <- 12
+V(g_cornelii)$label <- V(g_cornelii)$full_name
+V(g_cornelii)$label.cex <- 0.8
+
+# Set edge attributes for the Cornelii subgraph
+E(g_cornelii)$color <- ifelse(E(g_cornelii)$relation == "parent", "gray", "red")
+E(g_cornelii)$width <- ifelse(E(g_cornelii)$relation == "parent", 1, 2)
+E(g_cornelii)$arrow.size <- 0.5
+
+# Create a layout that works well for family networks
+layout_cornelii <- layout_with_fr(g_cornelii)
+
+# Plot the Cornelii subgraph
+plot(g_cornelii, 
+     layout = layout_cornelii,
+     vertex.label.dist = 0.7,
+     vertex.label.color = "black",
+     vertex.label.family = "sans",
+     vertex.label.degree = -pi/2,
+     edge.curved = 0.2,
+     main = "[Ficticious] Cornelii Family Network")
+
+# Add a legend for the Cornelii subgraph
+legend("bottomleft", 
+       legend = c("Cornelii", "Marriage ties to Valerii", "Marriage ties to Tullii", "Male", "Female", "Parent-Child", "Spouse"),
+       pch = c(15, 15, 15, 0, 1, NA, NA),
+       lty = c(NA, NA, NA, NA, NA, 1, 1),
+       lwd = c(NA, NA, NA, NA, NA, 1, 2),
+       col = c("lightgreen", "skyblue", "salmon", "black", "black", "gray", "red"),
+       pt.cex = 2,
+       cex = 0.8,
+       bty = "n")
+
+
+```
+
+## Temporal visualization showing generations
+
+Generational View organizes the network by generations based on birth years to show how the families evolved over time.
+
+```{r}
+# Add a generation attribute based on birth year
+family$generation <- cut(family$birth_year, 
+                            breaks = c(-120, -80, -40, 0, 40), 
+                            labels = c("Generation 1", "Generation 2", "Generation 3", "Generation 4"))
+
+# Create a generational network (simplified)
+gen_network <- family %>%
+  select(person_id, praenomen, nomen, cognomen, family_id, gender, generation) %>%
+  mutate(full_name = paste(praenomen, nomen, cognomen))
+
+# Create the generational graph
+g_gen <- graph_from_data_frame(d = relationships, vertices = gen_network, directed = TRUE)
+
+# Set vertex attributes for the generational graph
+V(g_gen)$color <- ifelse(V(g_gen)$family_id == 1, "skyblue", 
+                        ifelse(V(g_gen)$family_id == 2, "lightgreen", "salmon"))
+V(g_gen)$shape <- ifelse(V(g_gen)$gender == "M", "square", "circle")
+V(g_gen)$size <- 8
+V(g_gen)$label <- V(g_gen)$full_name
+V(g_gen)$label.cex <- 0.6
+
+# Set edge attributes for the generational graph
+E(g_gen)$color <- ifelse(E(g_gen)$relation == "parent", "gray", "red")
+E(g_gen)$width <- ifelse(E(g_gen)$relation == "parent", 1, 2)
+E(g_gen)$arrow.size <- 0.5
+
+# Create a layout that separates generations
+layout_gen <- layout_with_fr(g_gen)
+
+# Plot the generational graph
+plot(g_gen, 
+     layout = layout_gen,
+     vertex.label.dist = 0.5,
+     vertex.label.color = "black",
+     vertex.label.family = "sans",
+     vertex.label.degree = -pi/2,
+     edge.curved = 0.2,
+     main = "[Ficticious] Latin Family Network Across Generations")
+
+# Add a legend for the generational graph
+legend("bottomleft", 
+       legend = c("Valerii", "Cornelii", "Tullii", "Male", "Female", "Parent-Child", "Spouse"),
+       pch = c(15, 15, 15, 0, 1, NA, NA),
+       lty = c(NA, NA, NA, NA, NA, 1, 1),
+       lwd = c(NA, NA, NA, NA, NA, 1, 2),
+       col = c("skyblue", "lightgreen", "salmon", "black", "black", "gray", "red"),
+       pt.cex = 2,
+       cex = 0.8,
+       bty = "n")
+```
+
+
+To DO: 
+Add node size variation based on the number of connections
+Create an interactive version using packages like visNetwork or networkD3
+Add timeline elements to show when individuals lived
+Incorporate the inscription data to show the archaeological evidence
+
+# Network analysis
+
+To DO:
+show some basic metrics on the complex file
+degree centrality, 
+betweenness centrality
+eigenvector centrality
+
