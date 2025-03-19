@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400">
+  <!-- Background -->
+  <rect width="700" height="400" fill="#f9f5e9" />
+  
+  <!-- Grandparents Generation -->
+  <rect x="230" y="50" width="140" height="60" rx="5" fill="#d3c0a8" stroke="#8b7355" stroke-width="2" />
+  <text x="300" y="75" text-anchor="middle" font-family="serif" font-size="14">Publius Livius Macer</text>
+  <text x="300" y="95" text-anchor="middle" font-family="serif" font-size="12">Grandfather (Sevir)</text>
+  
+  <rect x="430" y="50" width="140" height="60" rx="5" fill="#d3c0a8" stroke="#8b7355" stroke-width="2" />
+  <text x="500" y="75" text-anchor="middle" font-family="serif" font-size="14">Pinaria Quarta</text>
+  <text x="500" y="95" text-anchor="middle" font-family="serif" font-size="12">Grandmother</text>
+  
+  <!-- Marriage line -->
+  <line x1="370" y1="80" x2="430" y2="80" stroke="#8b7355" stroke-width="2" />
+  
+  <!-- Parents Generation -->
+  <rect x="130" y="170" width="140" height="60" rx="5" fill="#c4dbb2" stroke="#5d8c5d" stroke-width="2" />
+  <text x="200" y="195" text-anchor="middle" font-family="serif" font-size="14">Publius Livius</text>
+  <text x="200" y="215" text-anchor="middle" font-family="serif" font-size="12">Father</text>
+  
+  <rect x="330" y="170" width="140" height="60" rx="5" fill="#c4dbb2" stroke="#5d8c5d" stroke-width="2" />
+  <text x="400" y="195" text-anchor="middle" font-family="serif" font-size="14">Vibia Polla</text>
+  <text x="400" y="215" text-anchor="middle" font-family="serif" font-size="12">Mother</text>
+  
+  <rect x="530" y="170" width="140" height="60" rx="5" fill="#c4dbb2" stroke="#5d8c5d" stroke-width="2" />
+  <text x="600" y="195" text-anchor="middle" font-family="serif" font-size="14">Livia Polla</text>
+  <text x="600" y="215" text-anchor="middle" font-family="serif" font-size="12">Paternal Aunt</text>
+  
+  <!-- Marriage line -->
+  <line x1="270" y1="200" x2="330" y2="200" stroke="#5d8c5d" stroke-width="2" />
+  
+  <!-- Connecting lines -->
+  <line x1="300" y1="110" x2="300" y2="130" stroke="#8b7355" stroke-width="2" />
+  <line x1="200" y1="130" x2="600" y2="130" stroke="#8b7355" stroke-width="2" />
+  <line x1="200" y1="130" x2="200" y2="170" stroke="#8b7355" stroke-width="2" />
+  <line x1="600" y1="130" x2="600" y2="170" stroke="#8b7355" stroke-width="2" />
+  
+  <!-- Main Person and Wife (with red highlight circle for main person) -->
+  <!-- Red circle highlight around main person -->
+  <circle cx="200" cy="320" r="80" fill="none" stroke="#ff0000" stroke-width="4" />
+  
+  <rect x="130" y="290" width="140" height="60" rx="5" fill="#b1c4e5" stroke="#4a6da7" stroke-width="2" />
+  <text x="200" y="315" text-anchor="middle" font-family="serif" font-size="14">Publius Livius Macer</text>
+  <text x="200" y="335" text-anchor="middle" font-family="serif" font-size="12">Main Person (Duumvir)</text>
+  
+  <rect x="330" y="290" width="140" height="60" rx="5" fill="#b1c4e5" stroke="#4a6da7" stroke-width="2" />
+  <text x="400" y="315" text-anchor="middle" font-family="serif" font-size="14">Junia Vetulla</text>
+  <text x="400" y="335" text-anchor="middle" font-family="serif" font-size="12">Wife</text>
+  
+  <!-- Marriage line -->
+  <line x1="270" y1="320" x2="330" y2="320" stroke="#4a6da7" stroke-width="2" />
+  
+  <!-- Final connecting line -->
+  <line x1="200" y1="230" x2="200" y2="290" stroke="#5d8c5d" stroke-width="2" />
+  
+  <!-- Title -->
+  <text x="350" y="30" text-anchor="middle" font-family="serif" font-weight="bold" font-size="18">Family of Publius Livius Macer</text>
+</svg>

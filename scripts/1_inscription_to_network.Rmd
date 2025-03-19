@@ -2,19 +2,20 @@
 title: "Hands-on Session: Reconstructing Past Social Networks from Inscriptions"
 author: 
 - Petra Hermankova^[Aarhus University, Denmark, https://orcid.org/0000-0002-6349-0540]
-date: "`r format(Sys.Date())`"
+- Tom Brughmans^[Aarhus University, Denmark, https://orcid.org/0000-0002-1589-7768]
+date: "Last updated: `r format(Sys.Date())`"
 output:
   html_document:
     theme: united
     toc: yes
     toc_float: true
     number_sections: true
-    toc_depth: 3
+    toc_depth: 2
     df_print: paged
 ---
 _Event: Epigraphy.info IX, 2-4 April 2025, Aarhus, Denmark. See https://epigraphy.info/workshop_9/ for details._
 
-This script demonstrates how to convert a real Latin inscription into a network using the famous Rabirii inscription from Via Appia (EDR103440: http://www.edr-edr.it/edr_programmi/res_complex_comune.php?do=book&id_nr=EDR103440).
+This script demonstrates how to convert people and their relationships from Latin inscriptions into a network representation.
 
 # Initial setup
 
@@ -38,70 +39,82 @@ library(networkD3)   # For interactive visualization
 
 # The inscription and its context
 
-**Information source**: EDR103440: http://www.edr-edr.it/edr_programmi/res_complex_comune.php?do=book&id_nr=EDR103440
+We are going to be working with a real inscription:
+**Epitaph from S. Ponso Canavese (Transpadana (Regio XI))** from EDH (https://edh.ub.uni-heidelberg.de/edh/inschrift/HD003544)
 
-**CIL number**: CIL 6.2246. 
+---
 
-**Description**: Funerary monument, with portrait relief, for Gaius Rabirius Hermodorus, Rabiria Demaris, and Usia Prima, a priestess of Isis. Dated between 50 BC / 40 BC (archaeological context and palaeography, EDR).
+**Chronological Data**:
+
+- 51 AD – 150 AD (EDH)
+- 71 AD - 130 AD (EDR)
+- 75 AD - 125 AD (Trismegistos)
+- 71 AD - 130 AD (EDCS)
+
+**Transcription** (from EDH):
+
+_P(ublius) Livius P(ubli) f(ilius) Macer  <br>
+IIvir QDIV sibi et  <br>
+Iuniae C(ai) f(iliae) Vetullae uxori <br>
+P(ublio) Livio Macro VIvir(o) avo  <br>
+Pinariae Sex(ti) f(iliae) Quartae aviae  <br>
+Liviae P(ubli) f(iliae) Pollae amitae  <br>
+Vibiae T(iti) f(iliae) Pollae matri t(estamento) f(ieri) i(ussit)_
+
+**Translation** (PHer):
+
+_Publius Livius Macer, son of Publius, <br>
+duumvir (municipal magistrate) QDIV, [had this monument made] for himself and for Iunia Vetulla, daughter of Gaius, his wife; <br>
+for Publius Livius Macro, sevir (member of a board of six), his grandfather; <br>
+for Pinaria Quarta, daughter of Sextus, his grandmother; <br>
+for Livia Polla, daughter of Publius, his paternal aunt; <br>
+for Vibia Polla, daughter of Titus, his mother; ordered this to be made by testament._
 
 **Images**:
-```{r, echo=FALSE, out.width="80%", fig.align="center"}
-# image from EDR
-knitr::include_graphics("http://www.edr-edr.it/foto_epigrafi/immagini_uso/103/103440.jpg?dummy=1741855097")
-# image from Center for Epigraphical and Paleographical Studies - Ohio State University http://hdl.handle.net/1811/100838
-knitr::include_graphics("../images/CIL_6_2246_1.jpg")   
 
+```{r, echo=FALSE, out.width="100%", fig.align="center"}
+# image from EDCS https://db.edcs.eu/epigr/bilder.php?s_language=en&bild=$Torino_00042.jpg
+knitr::include_graphics("../images/$Torino_00042.jpg")
 ```
 
 
-**Latin text of the inscription**:
-(as recorded in EDR, including the Leiden markup)
+**References**:
 
-〈:columna I〉
-C(aius) Rabirius Post(umi) l(ibertus)
-Hermodorus.
+- AE 1985, 0479.
+- G. Cresci Marrone, BollstorbiblSubalp 83, 1985, 577-579, Nr. 2; Foto 2. - AE 1985.
+- CIL 05, 06917. (B)
 
-〈:columna II〉
-Rabiria
-Demaris.
-
-〈:columna III〉
-《Usia Prima, sac(erdos)》
-《Isidis》.
+- https://www.trismegistos.org/text/285446
+- http://www.edr-edr.it/edr_programmi/res_complex_comune.php?do=book&id_nr=EDR079871
 
 
-```{r}
-# Latin text of the inscription (actual text from EDR103440):
-latin_text <- "〈:columna I〉
-C(aius) Rabirius Post(umi) l(ibertus)
-Hermodorus.
-〈:columna II〉
-Rabiria
-Demaris.
-〈:columna III〉
-《Usia Prima, sac(erdos)》
-《Isidis》."
+_Other bibliography:_
 
-english_translation <- "Gaius Rabirius Hermodorus, freedman of Postumus, Rabiria Demaris, Usia Prima, priestess of Isis"
+- Laes, C. (2024). Amitae and Materterae in Latin Inscriptions. A Contribution to the Study of the Roman Family.
+Arctos: acta philologica Fennica, 2023(57), 103-155. https://journal.fi/arctos/article/view/146916
 
-```
-
-# Identify people and relationships
+---
 
 ## Step 1: Identify individuals mentioned in the inscription
-```{r}
-# Let's identify each person and assign them an ID
 
+
+```{r}
+
+# Let's identify each person and assign them an ID
 people <- data.frame(
-  id = 1:4,
-  name = c("Gaius Rabirius Hermodorus", 
-           "Postumus Rabirius", 
-           "Rabiria Demaris", 
-           "Usia Prima"),
-  gender = c("male", "male", "female", "female"),
-  role = c("freedman", "former master", "wife", "priestess"),
-  status = c("freedman", "freeborn", "unknown", "unknown"),
-  additional_info = c("", "", "", "priestess of Isis"),
+  id = 1:8,
+  name = c("Publius Livius Macer", 
+           "Iunia Vetulla", 
+           "Publius Livius Macro", 
+           "Pinaria Quarta",
+           "Livia Polla",
+           "Vibia Polla",
+           "Publius Livius",
+           "Gaius"),
+  gender = c("male", "female", "male", "female", "female", "female", "male", "male"),
+  role = c("commissioner", "wife", "grandfather", "grandmother", "aunt", "mother", "father", "father"),
+  status = c("freeborn", "freeborn", "freeborn", "freeborn", "freeborn", "freeborn", "freeborn", "freeborn"),
+ generation = c(3, 3, 1, 1, 2, 2, 2, 2),
   stringsAsFactors = FALSE
 )
 
@@ -111,14 +124,29 @@ print(people)
 ```
 
 ## Step 2: Identify relationships between these individuals
-```{r}
 
+- Publius Livius Macer (1) is the spouse of Iunia Vetulla (2)
+- Publius Livius Macer (1) is the grandson of Publius Livius Macro (3)
+- Publius Livius Macer (1) is the grandson of Pinaria Quarta (4)
+- Publius Livius Macer (1) is the son of Publius Livius (7)
+- Publius Livius Macro (3) is the grandfather of Publius Livius Macer (1)
+- Iunia Vetulla (2) is the daughter of Gaius (8)
+- Pinaria Quarta (4) is the grandmother of Publius Livius Macer (1)
+- Livia Polla (5) is the aunt of Publius Livius Macer (1)
+- Vibia Polla (6) is the mother of Publius Livius Macer (1)
+- Publius Livius (7) is the father of Publius Livius Macer (1)
+- Publius Livius Macer (1) is the son of Vibia Polla (6)
+- Pinaria Quarta (4) is the spouse of Publius Livius Macro (3) INFERRED
+- Vibia Polla (6) is the spouse of Publius Livius (7) INFERRED
+- Vibia Polla (6) is the sibling of Livia Polla (5) INFERRED
+
+```{r}
+# Define relationships
 relationships <- data.frame(
-  from = c(1, 2, 1, 4),
-  to = c(2, 1, 3, NA),
-  relationship = c("freedman_of", "patron_of", "partner_of", "priestess_of_deity"),
-  certainty = c("certain", "certain", "uncertain", "certain"),
-  additional_info = c("", "", "possibly family members", "priestess of Isis"),
+  from = c(1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 1, 4, 6, 6),
+  to = c(2, 3, 4, 7, 8, 1, 1, 1, 1, 1, 6, 3, 7, 5),
+  relationship = c("spouse_of", "grandson_of", "grandson_of", "son_of", "daughter_of", "grandfather_of", "grandmother_of", "aunt_of", "mother_of", "father_of", "father_of", "spouse_of", "spouse_of", "sibling_of"),
+  certainty = c("certain", "certain", "certain", "certain", "certain", "certain", "certain", "certain", "certain", "certain", "certain", "inferred", "inferred", "inferred"),
   stringsAsFactors = FALSE
 )
 
@@ -136,7 +164,7 @@ print(relationships)
 relationships_clean <- relationships %>% 
   filter(!is.na(to))
 
-# Create the graph/network object
+# Create the graph/network object (using igraph package https://igraph.org/)
 inscription_network <- graph_from_data_frame(relationships_clean, directed = TRUE, vertices = people)
 
 # Print basic network information
@@ -147,8 +175,7 @@ print(inscription_network)
 ## Step 4: Basic visualization
 
 ```{r}
-
-cat("\nStep 4: Visualizing the network\n")
+# Visualizing the network using igraph package https://igraph.org/
 
 # Set plot parameters
 par(mar = c(0, 0, 2, 0))  # Adjust margins for better visualization
@@ -163,36 +190,237 @@ plot(inscription_network,
      edge.label = E(inscription_network)$relationship,
      edge.label.cex = 0.9,
      layout = layout_with_fr(inscription_network),
-     main = "Network from EDR103440 Inscription")
+     main = "Network of Publius Livius Macer (EDH003544 Inscription)")
 
 ```
 
 ## Step 5: Advanced visualization with ggraph
 
 ```{r}
+# Different ways to visualise the same data, using ggraph package https://ggraph.data-imaginist.com/
 
 # Create a more sophisticated visualization
 inscription_plot <- ggraph(inscription_network, layout = 'fr') + 
   geom_edge_link(aes(label = relationship, 
                      color = certainty), 
-                 arrow = arrow(length = unit(4, 'mm')), 
+                 arrow = arrow(length = unit(2, 'mm')), 
                  end_cap = circle(5, 'mm'),
                  angle_calc = 'along',
-                 label_size = 3) + 
+                 label_size = 2, 
+                 label_colour = "brown") + 
   geom_node_point(aes(color = gender, size = 5)) + 
   geom_node_text(aes(label = name), repel = TRUE, size = 3.5) +
   scale_edge_color_manual(values = c("certain" = "black", "uncertain" = "gray90")) +
   scale_color_manual(values = c("male" = "blue", "female" = "red")) +
   theme_graph() +
-  ggtitle("Social Relations in EDR103440 Inscription") +
+  ggtitle("Social Relations of Publius Livius Macer (EDH003544 Inscription)") +
   theme(legend.position = "bottom")
 
 # Print the plot
 print(inscription_plot)
 ```
 
+## Step 6: Genealogical visualisation
+
+```{r}
+# using igraph package
+
+# Create directed graph
+g <- graph_from_data_frame(d = relationships, vertices = people, directed = TRUE)
+
+# Set visual attributes
+V(g)$color <- ifelse(V(g)$generation == 1, "tan", 
+                   ifelse(V(g)$generation == 2, "lightgreen", "lightblue"))
+V(g)$shape <- ifelse(V(g)$gender == "female", "circle", "rectangle") #female = circle, male = rectangle
+V(g)$label.cex <- 1
+E(g)$color <- ifelse(E(g)$certainty == "certain", "black", "gray")
+E(g)$width <- ifelse(E(g)$certainty == "certain", 2, 1)
+E(g)$arrow.size <- 0.6
+
+# Create a layout with generations properly positioned
+# Custom layout to resemble a traditional family tree 
+
+### If you are adding new people, don't forget to position them in the matrix - the first number denotes the right to left position, the other one generations, e.g. generation 1: 300, generation 2:200, generation 3: 100
+custom_layout <- matrix(c(
+  400, 100,  # 1: Publius Livius Macer (main person)
+  500, 100,  # 2: Iunia Vetulla (wife)
+  300, 300,  # 3: Publius Livius Macro (grandfather)
+  500, 300,  # 4: Pinaria Quarta (grandmother)
+  200, 200,  # 5: Livia Polla (aunt)
+  300, 200,  # 6: Vibia Polla (mother)
+  400, 200,  # 7: Publius Livius (father)
+  600, 200   # 8: Gaius (father)
+), ncol = 2, byrow = TRUE)
+
+# Plot the graph
+png("../images/PubliusLiviusMacer_roman_family_tree.png", width = 1200, height = 800,
+    res = 100
+    )
+plot(g, layout = custom_layout,
+     edge.label = E(g)$relationship,
+     edge.label.dist = 1,
+     edge.label.cex = 0.6,
+     edge.curved = 0,
+     edge.label.color = "darkblue",
+     vertex.size = 25,
+     vertex.label.color = "black",
+     vertex.frame.color = "grey",
+     vertex.label.cex = 0.8,
+     vertex.label.dist = 1,             # node label size
+     vertex.label.font = 2,             # node label type (bold)
+     vertex.label = E(g)$name,
+     main = "Family of Publius Livius Macer from EDH003544")
+
+legend("bottomleft", 
+       legend = c("Certain Relationship", "Inferred Relationship", 
+                 "Grandparents", "Parents", "Main Generation"), 
+       lty = c(1, 1, NA, NA, NA), 
+       col = c("black", "gray", "tan", "lightgreen", "lightblue"),
+       pch = c(NA, NA, 15, 15, 15),
+       cex = 0.8,
+       bg = "white")
+
+
+```
+
+
+## Exercise - add missing poeple and relationships
+
+_Your task is to identify any individuals from the text of the inscription who are missing and add them to the graph, using the script above._
+
+**The text of the inscription:** 
+
+_P(ublius) Livius P(ubli) f(ilius) Macer  <br>
+IIvir QDIV sibi et  <br>
+Iuniae C(ai) f(iliae) Vetullae uxori <br>
+P(ublio) Livio Macro VIvir(o) avo  <br>
+Pinariae **Sex(ti)** f(iliae) Quartae aviae  <br>
+Liviae P(ubli) f(iliae) Pollae amitae  <br>
+Vibiae **T(iti)** f(iliae) Pollae matri t(estamento) f(ieri) i(ussit)_
+
+
+### Exercise 1:  Reconstruct the persons of Sextus and Titus
+
+You can either copy paste the code from above, or create your people and relationships in the spreadsheet and load them back into R. The spreadsheets are located in the `data` folder. Open them with a software of your choice and edit.
+
+#### Step 1: People
+
+```{r}
+# loading a spreadsheet into R
+
+people2 <- read.csv("../data/People_simple.csv")
+people2
+```
+
+#### Step 2: Relationships
+```{r}
+# loading a spreadsheet into R
+
+relationships2 <- read.csv("../data/Relationships_simple.csv")
+relationships2
+```
+
+#### Step 3: Create the network
+
+```{r}
+# Remove NA relationships for network creation
+relationships_clean2 <- relationships2 %>% 
+  filter(!is.na(to))
+
+# Create the graph/network object
+inscription_network2 <- graph_from_data_frame(relationships_clean2, directed = TRUE, vertices = people2)
+
+# Print basic network information
+print(inscription_network2)
+
+```
+
+#### Step 4: Visualise the network
+
+```{r}
+# using igraph package
+
+# Create directed graph
+g2 <- graph_from_data_frame(d = relationships2, vertices = people2, directed = TRUE)
+
+# Set visual attributes
+V(g2)$color <- ifelse(V(g2)$generation == 1, "tan", 
+                   ifelse(V(g2)$generation == 2, "lightgreen", "lightblue"))
+V(g2)$shape <- ifelse(V(g2)$gender == "female", "circle", "rectangle") #female = circle, male = rectangle
+V(g2)$label.cex <- 1
+E(g2)$color <- ifelse(E(g2)$certainty == "certain", "black", "gray")
+E(g2)$width <- ifelse(E(g2)$certainty == "certain", 2, 1)
+E(g2)$arrow.size <- 0.6
+
+# Create a layout with generations properly positioned
+# Custom layout to resemble a traditional family tree
+
+### If you are adding new people, don't forget to position them in the matrix - the first number denotes the right to left position, the other one generations, e.g. generation 1: 300, generation 2:200, generation 3: 100
+
+custom_layout <- matrix(c(
+  400, 100,  # 1: Publius Livius Macer (main person)
+  500, 100,  # 2: Iunia Vetulla (wife)
+  300, 300,  # 3: Publius Livius Macro (grandfather)
+  500, 300,  # 4: Pinaria Quarta (grandmother)
+  200, 200,  # 5: Livia Polla (aunt)
+  300, 200,  # 6: Vibia Polla (mother)
+  400, 200,  # 7: Publius Livius (father)
+  600, 200   # 8: Gaius (father)
+), ncol = 2, byrow = TRUE)
+
+# Plot the graph
+png("../images/PubliusLiviusMacer_roman_family_tree_updated.png", width = 1200, height = 800,
+    res = 100
+    )
+plot(g, layout = custom_layout,
+     edge.label = E(g2)$relationship,
+     edge.label.dist = 1,
+     edge.label.cex = 0.6,
+     edge.curved = 0,
+     edge.label.color = "darkblue",
+     vertex.size = 25,
+     vertex.label.color = "black",
+     vertex.frame.color = "grey",
+     vertex.label.cex = 0.8,
+     vertex.label.dist = 1,             # node label size
+     vertex.label.font = 2,             # node label type (bold)
+     vertex.label = E(g2)$name,
+     main = "Family of Publius Livius Macer from EDH003544")
+
+legend("bottomleft", 
+       legend = c("Certain Relationship", "Inferred Relationship", 
+                 "Grandparents", "Parents", "Main Generation"), 
+       lty = c(1, 1, NA, NA, NA), 
+       col = c("black", "gray", "tan", "lightgreen", "lightblue"),
+       pch = c(NA, NA, 15, 15, 15),
+       cex = 0.8,
+       bg = "white")
+
+
+```
+
+Compare your new visualisation with the old one. Are you happy with the result? If not, go back to the data or the code and adjust accordingly.
+
+
+### Exercise 2 (Advanced): Reconstruct the inferred people and relationships
+
+First, let's discuss the following scenarios from the methodological point of view. How would you go about it?
+
+1. What does the name of Pinaria Quarta suggests? _Hint - try to reconstruct missing siblings Pinaria Prima, Pinaria Secunda, Pinaria Tertia._
+2. The same applies for siblings of Sextus. What are your assumptions?
+3. How would you go about reconstructing the missing, yet biologically prerequisite, men and women, such as wife of Gaius, wife of Sextus, or parents of Sextus?
+
+Once you have identified the people and their relationships, you can add them and try to visualise them.
+
+```{r}
+# work here
+```
+
+
 
 # More complex data - family ties
+
+To demonstrate more advanced scenarios and demonstrate the utility of SNA beyond visualisations, we need to load in a new larger dataset.
 
 Using AI (Claude.ai) generated dataset of 74 individuals and their family ties from a ficticious corpus called INS.
 

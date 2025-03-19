@@ -1,0 +1,9 @@
+id,name,gender,role,status,generation
+1,Publius Livius Macer,male,commissioner,freeborn,3
+2,Iunia Vetulla,female,wife,freeborn,3
+3,Publius Livius Macro,male,grandfather,freeborn,1
+4,Pinaria Quarta,female,grandmother,freeborn,1
+5,Livia Polla,female,aunt,freeborn,2
+6,Vibia Polla,female,mother,freeborn,2
+7,Publius Livius,male,father,freeborn,2
+8,Gaius,male,father,freeborn,2
