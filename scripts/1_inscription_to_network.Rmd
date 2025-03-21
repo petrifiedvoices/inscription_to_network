@@ -10,7 +10,7 @@ output:
     toc: yes
     toc_float: true
     number_sections: true
-    toc_depth: 2
+    toc_depth: 3
     df_print: paged
 ---
 _Event: Epigraphy.info IX, 2-4 April 2025, Aarhus, Denmark. See https://epigraphy.info/workshop_9/ for details._
@@ -27,6 +27,7 @@ if (!requireNamespace("dplyr", quietly = TRUE)) install.packages("dplyr")
 if (!requireNamespace("ggplot2", quietly = TRUE)) install.packages("ggplot2")
 if (!requireNamespace("ggraph", quietly = TRUE)) install.packages("ggraph")
 if (!requireNamespace("networkD3", quietly = TRUE)) install.packages("networkD3")
+if (!requireNamespace("tidyverse", quietly = TRUE)) install.packages("tidyverse")
 
 # Load required libraries
 library(igraph)      # For network creation and analysis
@@ -34,10 +35,13 @@ library(dplyr)       # For data manipulation
 library(ggplot2)     # For visualization
 library(ggraph)      # For advanced network visualization
 library(networkD3)   # For interactive visualization
+library(tidyverse)   # For data manipulation
 
 ```
 
-# The inscription and its context
+# Case study 1 - family network of Publis Livius Macer
+
+## The inscription and its context
 
 We are going to be working with a real inscription:
 **Epitaph from S. Ponso Canavese (Transpadana (Regio XI))** from EDH (https://edh.ub.uni-heidelberg.de/edh/inschrift/HD003544)
@@ -69,6 +73,10 @@ for Publius Livius Macro, sevir (member of a board of six), his grandfather; <br
 for Pinaria Quarta, daughter of Sextus, his grandmother; <br>
 for Livia Polla, daughter of Publius, his paternal aunt; <br>
 for Vibia Polla, daughter of Titus, his mother; ordered this to be made by testament._
+
+Note: Macer is a Roman cognomen meaning "lean".
+
+
 
 **Images**:
 
@@ -279,12 +287,11 @@ legend("bottomleft",
        pch = c(NA, NA, 15, 15, 15),
        cex = 0.8,
        bg = "white")
-
-
 ```
 
+![Visualisation](../images/PubliusLiviusMacer_roman_family_tree.png)
 
-## Exercise - add missing poeple and relationships
+## Hands-on - add missing poeple and relationships
 
 _Your task is to identify any individuals from the text of the inscription who are missing and add them to the graph, using the script above._
 
@@ -401,6 +408,7 @@ legend("bottomleft",
 
 Compare your new visualisation with the old one. Are you happy with the result? If not, go back to the data or the code and adjust accordingly.
 
+![Visualisation](../imaPubliusLiviusMacer_roman_family_tree_updated.png)
 
 ### Exercise 2 (Advanced): Reconstruct the inferred people and relationships
 
@@ -417,281 +425,288 @@ Once you have identified the people and their relationships, you can add them an
 ```
 
 
+---
 
-# More complex data - family ties
+# Case study 2 - Network of Clodii family from Pompeii
 
-To demonstrate more advanced scenarios and demonstrate the utility of SNA beyond visualisations, we need to load in a new larger dataset.
+## The family and its context
 
-Using AI (Claude.ai) generated dataset of 74 individuals and their family ties from a ficticious corpus called INS.
+Most of the Clodii family derives from A. Clodius M. f., tribe Palatina, who might have come from Rome or Puteoli (Castren 1975, 154). After his marriage to the faimly of the Lassii, who were wine producers, he and his decendants engaged mainly in specialized agriculture and wine production (vinum Clodianum).
 
-**Dataset Structure**:
+**References:** 
+- Wim Broekart, 2020. The Pompeian Connection: A Social Network Approach to Elites
+and Sub-Elites in the Bay of Naples https://jhnr.net/articles/25/files/653f546ab5567.pdf
+- Paavo Castren 1975, Ordo populusque Pompeianus: polity and society in Roman Pompeii https://archive.org/details/ordopopulusquepo0008cast
 
-- Basic Information: Names (praenomen, nomen, cognomen), family ID, birth/death years, gender
-- Family Connections: Father, mother, spouse, and patron IDs
-- Social Context: Status (patrician/plebeian)
-- Archaeological Data: Inscription ID, location, and type
+I have manually created the list of 54 people and their relationships, based on the information from 21 inscriptions, that we will now turn into a network, visualise and analyse.
 
-**The Three Families**:
-
-- Valerii (family_id 1): A patrician family with branches in Rome, Ostia, Pompeii and Herculaneum
-- Cornelii (family_id 2): A prominent patrician family centered in Rome and Capua
-- Tullii (family_id 3): A family with both patrician and plebeian members, primarily in Rome
-
-**Interconnections**:
-
-- Marriage alliances between families (example: person 53, Valeria Messalina, connects the Valerii to the Cornelii)
-- Multiple generations (spanning approximately 200 years)
-- Various inscription types (funerary, honorary, votive)
-
-
-## Load the data
+## Datasets
 ```{r}
-# Load necessary libraries
-library(igraph)
-library(dplyr)
-library(readr)
-library(ggplot2)
+# loading a spreadsheet into R
+
+people3 <- read.csv("../data/Pompeii_People.csv")
+people3
 ```
 
 ```{r}
-# Read the CSV data
-  family <- read.csv("../data/latin-inscriptions-family-data.txt", stringsAsFactors = FALSE)
+# loading a spreadsheet into R
+
+relationships3 <- read.csv("../data/Pompeii_Relationships.csv")
+relationships3
 ```
 
+## Network
 ```{r}
-# display the data
-family
+# Create the graph/network object (using igraph package https://igraph.org/)
+inscription_network3 <- graph_from_data_frame(relationships3, directed = TRUE, vertices = people3)
+
+# Print basic network information
+print(inscription_network3)
 ```
 
-## Process the data
-
+## Visualization
 ```{r}
-# Clean up the data - replace NA strings with actual NA values
-family[family == "NA"] <- NA
+# Visualizing the network using igraph package https://igraph.org/
 
-```
+# Set plot parameters
+par(mar = c(0, 0, 2, 0))  # Adjust margins for better visualization
 
-```{r}
-# Create family relationships dataframe
-relationships <- data.frame(
-  from = character(),
-  to = character(),
-  relation = character(),
-  stringsAsFactors = FALSE
-)
+V(g)$color <- ifelse(V(g)$generation == 1, "tan", 
+                   ifelse(V(g)$generation == 2, "lightgreen", "lightblue"))
 
-# Add parent-child relationships
-# Father-child
-father_child <- family %>%
-  filter(!is.na(father_id)) %>%
-  select(father_id, person_id)
-father_child$relation <- "parent"
-names(father_child) <- c("from", "to", "relation")
+png("../images/ClodiusFamily.png", width = 1200, height = 800,
+    res = 100 )
+# Plot the network
+plot(inscription_network3, 
+     vertex.label = V(inscription_network3)$name,
+     vertex.color = ifelse(V(inscription_network3)$period == "A", "red",
+                           ifelse(V(inscription_network3)$period == "B", "orange",
+                                  ifelse(V(inscription_network3)$period == "C","yellow", "grey"))),
+     vertex.size = 10,
+     vertex.label.cex = 0.8,
+     vertex.label.dist = 0.1,             # node label size
+     vertex.label.font = 1, 
+     edge.arrow.size = 0.1,
+     edge.label = E(inscription_network3)$relationship,
+     edge.label.cex = 0.5,
+     edge.label.color = "brown",
+     layout = layout_with_fr(inscription_network3),
+     main = "Relationships withn the Clodii family")
 
-# Mother-child
-mother_child <- family %>%
-  filter(!is.na(mother_id)) %>%
-  select(mother_id, person_id)
-mother_child$relation <- "parent"
-names(mother_child) <- c("from", "to", "relation")
 
-# Spouse relationships
-spouse <- family %>%
-  filter(!is.na(spouse_id) & person_id < spouse_id) %>%
-  select(person_id, spouse_id)
-spouse$relation <- "spouse"
-names(spouse) <- c("from", "to", "relation")
-
-# Combine all relationships
-relationships <- rbind(relationships, father_child, mother_child, spouse)
-
-# Create a lookup table for person names
-person_lookup <- family %>%
-  mutate(full_name = paste(praenomen, nomen, cognomen)) %>%
-  select(person_id, full_name, family_id, gender, birth_year, death_year)
-
-person_lookup
-```
-
-## Visualise the data
-
-Main Network Visualization shows all three families with their interconnections, using:
-- Different colors for each family (Valerii in blue, Cornelii in green, Tullii in salmon)
-- Different shapes for gender (squares for males, circles for females)
-- Different line styles for relationship types (gray for parent-child, red for spouse
-
-The visualizations use the Fruchterman-Reingold layout algorithm, which works well for family networks as it tends to place connected nodes closer together.
-
-```{r}
-# Create the network graph
-g <- graph_from_data_frame(d = relationships, vertices = person_lookup, directed = TRUE)
-
-# Set vertex attributes
-V(g)$color <- ifelse(V(g)$family_id == 1, "skyblue", 
-                    ifelse(V(g)$family_id == 2, "lightgreen", "salmon"))
-V(g)$shape <- ifelse(V(g)$gender == "M", "square", "circle")
-V(g)$size <- 10
-V(g)$label <- V(g)$full_name
-V(g)$label.cex <- 0.7
-
-# Set edge attributes
-E(g)$color <- ifelse(E(g)$relation == "parent", "gray", "red")
-E(g)$width <- ifelse(E(g)$relation == "parent", 1, 2)
-E(g)$arrow.size <- 0.5
-
-# Create a layout that works well for family networks
-layout_family <- layout_with_fr(g)
-
-# Plot the graph
-plot(g, 
-     layout = layout_family,
-     vertex.label.dist = 0.5,
-     vertex.label.color = "black",
-     vertex.label.family = "sans",
-     vertex.label.degree = -pi/2,
-     edge.curved = 0.2,
-     main = "[Ficticious] Latin Family Network from Inscriptions")
-
-# Add a legend
-legend("bottomleft", 
-       legend = c("Valerii (Family 1)", "Cornelii (Family 2)", "Tullii (Family 3)", "Male", "Female", "Parent-Child", "Spouse"),
-       pch = c(15, 15, 15, 0, 1, NA, NA),
-       lty = c(NA, NA, NA, NA, NA, 1, 1),
-       lwd = c(NA, NA, NA, NA, NA, 1, 2),
-       col = c("skyblue", "lightgreen", "salmon", "black", "black", "gray", "red"),
-       pt.cex = 2,
+legend("bottomleft", title="Date",
+       legend = c("27 BC to 14 AD", "1-50 AD", 
+                 "50-79 AD", "No date"), 
+       col = c("red", "orange", "yellow", "grey"),
+       pch = c(15, 15, 15, 15),
        cex = 0.8,
-       bty = "n")
-```
-
-## Focus on one family
-
-Cornelii Family Focus: A more detailed view of just the Cornelii family and their marriage connections to other families.
-```{r}
-# For example, let's focus on the Cornelii (family_id 2)
-
-# Filter for just family 2
-cornelii_ids <- family %>% 
-  filter(family_id == 2) %>% 
-  pull(person_id)
-
-# Get all relationships involving Cornelii
-cornelii_relations <- relationships %>%
-  filter(from %in% cornelii_ids | to %in% cornelii_ids)
-
-# Create the subgraph
-g_cornelii <- graph_from_data_frame(d = cornelii_relations, 
-                                   vertices = person_lookup %>% filter(person_id %in% unique(c(cornelii_relations$from, cornelii_relations$to))), 
-                                   directed = TRUE)
-
-# Set vertex attributes for the Cornelii subgraph
-V(g_cornelii)$color <- ifelse(V(g_cornelii)$family_id == 2, "lightgreen", 
-                             ifelse(V(g_cornelii)$family_id == 1, "skyblue", "salmon"))
-V(g_cornelii)$shape <- ifelse(V(g_cornelii)$gender == "M", "square", "circle")
-V(g_cornelii)$size <- 12
-V(g_cornelii)$label <- V(g_cornelii)$full_name
-V(g_cornelii)$label.cex <- 0.8
-
-# Set edge attributes for the Cornelii subgraph
-E(g_cornelii)$color <- ifelse(E(g_cornelii)$relation == "parent", "gray", "red")
-E(g_cornelii)$width <- ifelse(E(g_cornelii)$relation == "parent", 1, 2)
-E(g_cornelii)$arrow.size <- 0.5
-
-# Create a layout that works well for family networks
-layout_cornelii <- layout_with_fr(g_cornelii)
-
-# Plot the Cornelii subgraph
-plot(g_cornelii, 
-     layout = layout_cornelii,
-     vertex.label.dist = 0.7,
-     vertex.label.color = "black",
-     vertex.label.family = "sans",
-     vertex.label.degree = -pi/2,
-     edge.curved = 0.2,
-     main = "[Ficticious] Cornelii Family Network")
-
-# Add a legend for the Cornelii subgraph
-legend("bottomleft", 
-       legend = c("Cornelii", "Marriage ties to Valerii", "Marriage ties to Tullii", "Male", "Female", "Parent-Child", "Spouse"),
-       pch = c(15, 15, 15, 0, 1, NA, NA),
-       lty = c(NA, NA, NA, NA, NA, 1, 1),
-       lwd = c(NA, NA, NA, NA, NA, 1, 2),
-       col = c("lightgreen", "skyblue", "salmon", "black", "black", "gray", "red"),
-       pt.cex = 2,
-       cex = 0.8,
-       bty = "n")
-
+       bg = "white")
 
 ```
 
-## Temporal visualization showing generations
+![Visualisation](../images/ClodiusFamily.png)
 
-Generational View organizes the network by generations based on birth years to show how the families evolved over time.
+## Basic network analytics
 
 ```{r}
-# Add a generation attribute based on birth year
-family$generation <- cut(family$birth_year, 
-                            breaks = c(-120, -80, -40, 0, 40), 
-                            labels = c("Generation 1", "Generation 2", "Generation 3", "Generation 4"))
+# Number of vertices
+num_vertices <- vcount(inscription_network3)
 
-# Create a generational network (simplified)
-gen_network <- family %>%
-  select(person_id, praenomen, nomen, cognomen, family_id, gender, generation) %>%
-  mutate(full_name = paste(praenomen, nomen, cognomen))
+# Number of edges
+num_edges <- ecount(inscription_network3)
 
-# Create the generational graph
-g_gen <- graph_from_data_frame(d = relationships, vertices = gen_network, directed = TRUE)
+# Density
+density <- edge_density(inscription_network3)
 
-# Set vertex attributes for the generational graph
-V(g_gen)$color <- ifelse(V(g_gen)$family_id == 1, "skyblue", 
-                        ifelse(V(g_gen)$family_id == 2, "lightgreen", "salmon"))
-V(g_gen)$shape <- ifelse(V(g_gen)$gender == "M", "square", "circle")
-V(g_gen)$size <- 8
-V(g_gen)$label <- V(g_gen)$full_name
-V(g_gen)$label.cex <- 0.6
+# Diameter
+diameter <- diameter(inscription_network3, directed = TRUE)
 
-# Set edge attributes for the generational graph
-E(g_gen)$color <- ifelse(E(g_gen)$relation == "parent", "gray", "red")
-E(g_gen)$width <- ifelse(E(g_gen)$relation == "parent", 1, 2)
-E(g_gen)$arrow.size <- 0.5
+# Average path length
+average_path_length <- mean_distance(inscription_network3, directed = TRUE)
 
-# Create a layout that separates generations
-layout_gen <- layout_with_fr(g_gen)
+# Clustering coefficient
+clustering_coefficient <- transitivity(inscription_network3, type = "global")
 
-# Plot the generational graph
-plot(g_gen, 
-     layout = layout_gen,
-     vertex.label.dist = 0.5,
-     vertex.label.color = "black",
-     vertex.label.family = "sans",
-     vertex.label.degree = -pi/2,
-     edge.curved = 0.2,
-     main = "[Ficticious] Latin Family Network Across Generations")
-
-# Add a legend for the generational graph
-legend("bottomleft", 
-       legend = c("Valerii", "Cornelii", "Tullii", "Male", "Female", "Parent-Child", "Spouse"),
-       pch = c(15, 15, 15, 0, 1, NA, NA),
-       lty = c(NA, NA, NA, NA, NA, 1, 1),
-       lwd = c(NA, NA, NA, NA, NA, 1, 2),
-       col = c("skyblue", "lightgreen", "salmon", "black", "black", "gray", "red"),
-       pt.cex = 2,
-       cex = 0.8,
-       bty = "n")
+# Print basic analytics
+cat("Number of vertices:", num_vertices, "(The total count of unique nodes or entities in the network.)\n")
+cat("Number of edges:", num_edges, "(The total count of connections or relationships between the nodes in the network.)\n")
+cat("Density:", density, "(The proportion of possible connections in the network that are actually present.)\n")
+cat("Diameter:", diameter, "(The longest shortest path between any two nodes in the network.)\n")
+cat("Average path length:", average_path_length, "(The average number of steps along the shortest paths for all possible pairs of nodes in a network, indicating how closely connected the nodes are.)\n")
+cat("Clustering coefficient:", clustering_coefficient, "(The degree to which nodes in the network tend to cluster together.)\n")
 ```
 
 
-To DO: 
-Add node size variation based on the number of connections
-Create an interactive version using packages like visNetwork or networkD3
-Add timeline elements to show when individuals lived
-Incorporate the inscription data to show the archaeological evidence
+## Centrality measures
+```{r}
+# Calculate centrality measures
+degree_centrality <- degree(inscription_network3)
+betweenness_centrality <- betweenness(inscription_network3)
+closeness_centrality <- closeness(inscription_network3)
+eigenvector_centrality <- eigen_centrality(inscription_network3)$vector
 
-# Network analysis
+```
 
-To DO:
-show some basic metrics on the complex file
-degree centrality, 
-betweenness centrality
-eigenvector centrality
+### Degree Centrality
+```{r}
+# Print centrality measures
+cat("Degree Centrality:\n", degree_centrality, "\n")
+```
+
+_Definition:_ Measures the number of direct connections a node has.
+
+_Interpretation:_ Nodes with higher values (e.g., 27, 30) have more direct connections, indicating they are highly connected and potentially influential within the network. Nodes with lower values (e.g., 2) have fewer direct connections.
+
+### Betweenness Centrality
+```{r}
+cat("Betweenness Centrality:\n", betweenness_centrality, "\n")
+```
+
+_Definition:_ Measures the extent to which a node lies on paths between other nodes.
+
+_Interpretation:_ Nodes with higher values (e.g., 612, 716.5) act as bridges or gatekeepers, controlling the flow of information between different parts of the network. Nodes with a value of 0 do not lie on any paths between other nodes.
+
+### Closeness Centrality
+```{r}
+cat("Closeness Centrality:\n", closeness_centrality, "\n")
+```
+
+_Definition:_ Measures how close a node is to all other nodes in the network.
+
+_Interpretation:_ Nodes with higher values (e.g., 0.01886792) can quickly interact with all other nodes, indicating they are efficient in spreading information or resources. Nodes with lower values (e.g., 0.008264463) are less efficient in this regard.
+
+### Eigenvector Centrality
+```{r}
+cat("Eigenvector Centrality:\n", eigenvector_centrality, "\n")
+```
+
+_Definition:_ Measures the influence of a node in the network, considering the influence of its neighbors.
+
+_Interpretation:_ Nodes with higher values (e.g., 1, 0.6681126) are connected to other highly influential nodes, indicating they hold a prestigious position within the network. Nodes with lower values (e.g., 0.05564133) are less influential.
+
+Highly Connected Nodes: Nodes with high degree centrality (e.g., 27, 30) are key players in terms of direct interactions.
+Bridges/Gatekeepers: Nodes with high betweenness centrality (e.g., 612, 716.5) facilitate communication between different parts of the network.
+Efficient Spreaders: Nodes with high closeness centrality (e.g., 0.01886792) can quickly interact with all other nodes.
+Influential Nodes: Nodes with high eigenvector centrality (e.g., 1, 0.6681126) are connected to other influential nodes and hold a prestigious position.
+
+
+```{r}
+# Assuming eigenvector_centrality and betweenness_centrality are vectors with names corresponding to nodes
+most_influential_eigenvector <- names(which.max(eigenvector_centrality))
+most_influential_betweenness <- names(which.max(betweenness_centrality))
+
+cat("Most influential person based on Eigenvector Centrality:", most_influential_eigenvector, "\n")
+cat("Most influential person based on Betweenness Centrality:", most_influential_betweenness, "\n")
+```
+
+
+
+## Hypothetical scenario
+
+What happens if we add a hypothetical connection between Clodius (1) and M Clodius Ampliatus (2). Let's say they were cousins (conjectured).
+
+Edit in the CSV file, save as `Pompeii_Relationships_hypothetical.csv` and load it into R.
+
+```{r}
+relationships4 <- read.csv("../data/Pompeii_Relationships_hypothetical.csv")
+```
+
+Create a network
+```{r}
+# Create the graph/network object (using igraph package https://igraph.org/)
+inscription_network4 <- graph_from_data_frame(relationships4, directed = TRUE, vertices = people3)
+
+# Print basic network information
+print(inscription_network4)
+```
+
+
+Now let's have a look what it does to our network!
+
+```{r}
+# Visualizing the network using igraph package https://igraph.org/
+
+# Set plot parameters
+par(mar = c(0, 0, 2, 0))  # Adjust margins for better visualization
+
+V(g)$color <- ifelse(V(g)$generation == 1, "tan", 
+                   ifelse(V(g)$generation == 2, "lightgreen", "lightblue"))
+
+png("../images/ClodiusFamily_hypothetical.png", width = 1200, height = 800,
+    res = 100 )
+# Plot the network
+plot(inscription_network4, 
+     vertex.label = V(inscription_network4)$name,
+     vertex.color = ifelse(V(inscription_network4)$period == "A", "red",
+                           ifelse(V(inscription_network4)$period == "B", "orange",
+                                  ifelse(V(inscription_network4)$period == "C","yellow", "grey"))),
+     vertex.size = 10,
+     vertex.label.cex = 0.8,
+     vertex.label.dist = 0.1,             # node label size
+     vertex.label.font = 1, 
+     edge.arrow.size = 0.1,
+     edge.label = E(inscription_network4)$relationship,
+     edge.label.cex = 0.5,
+     edge.label.color = "brown",
+     layout = layout_with_fr(inscription_network4),
+     main = "Relationships withn the Clodii family (hypothetical)")
+
+
+legend("bottomleft", title="Date",
+       legend = c("27 BC to 14 AD", "1-50 AD", 
+                 "50-79 AD", "No date"), 
+       col = c("red", "orange", "yellow", "grey"),
+       pch = c(15, 15, 15, 15),
+       cex = 0.8,
+       bg = "white")
+
+```
+
+Now, let's compare both networks:
+
+```{r, echo=FALSE, out.width="100%", fig.align="center"}
+knitr::include_graphics("../images/ClodiusFamily.png")
+knitr::include_graphics("../images/ClodiusFamily_hypothetical.png")
+```
+Let's see how some of the analytical data change:
+
+```{r}
+eigenvector_centrality2 <- eigen_centrality(inscription_network4)$vector
+
+
+cat("Original Eigenvector Centrality:\n", eigenvector_centrality, "\n")
+cat("Hypothetical Eigenvector Centrality:\n", eigenvector_centrality2, "\n")
+```
+
+Commentary: Adding the hypothetical connection between Clodius and M Clodius Ampliatus increases their centrality, making them more influential in the network.
+
+```{r}
+# Find the person with the highest eigenvector centrality
+eigenvector_centrality %>% 
+  sort(decreasing = TRUE)
+```
+
+```{r}
+eigenvector_centrality2 %>% 
+  sort(decreasing = TRUE)
+```
+
+Similarly, we can compare other analytical results.
+
+Let's look at Betweenness centrality:
+
+```{r}
+# work here
+```
+
+
+# Resources
+
+For more resources and practical exercises in SNA in historical and archaeological data, please see:
+
+`Brughmans, Tom, and Matthew A. Peeples. Network Science in Archaeology. of Cambridge Manuals in Archaeology. Cambridge: Cambridge University Press, 2023. https://doi.org/10.1017/9781009170659`
+
+The online appendix and exercises are available via https://archnetworks.net/
+
+
 
