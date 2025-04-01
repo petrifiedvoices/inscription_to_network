@@ -763,7 +763,8 @@ The online appendix and exercises are available via https://archnetworks.net/
 - Digital Humanities Conference (https://adho.org/conference/)
 - Computer Applications in Archaeology (https://caa-international.org/)
 
-###Journals
+### Journals
+
 - The Journal of Historical Network Research (https://jhnr.net/)
 - Digital Scholarship in the Humanities (https://academic.oup.com/dsh) 
 - Social Networks (https://www.sciencedirect.com/journal/social-networks)
@@ -773,7 +774,7 @@ The online appendix and exercises are available via https://archnetworks.net/
 
 ### Tutorials
 
-Online resources for The Cambridge Manual of Network Science in Archaeology: includes exhaustive tutorials in R on all aspects of past network research (https://book.archnetworks.net/) 
+- Online resources for The Cambridge Manual of Network Science in Archaeology: includes exhaustive tutorials in R on all aspects of past network research (https://book.archnetworks.net/) 
 - Uncertainty in networks
 - Spatial networks
 - ERGMs
@@ -782,19 +783,19 @@ Online resources for The Cambridge Manual of Network Science in Archaeology: inc
 - Network diffusion
 - Comparing networks
 
-Dozens of tutorials are listed in the HNR website  (https://historicalnetworkresearch.org/external-resources/) 
+- Dozens of tutorials are listed in the HNR website  (https://historicalnetworkresearch.org/external-resources/) 
 
-Archaeological network data and network analysis scripts by Matt Peeples:  (https://mattpeeples.net/data-and-software/)
+- Archaeological network data and network analysis scripts by Matt Peeples:  (https://mattpeeples.net/data-and-software/)
 
-Archaeological network research tutorials by Tom Brughmans (https://archaeologicalnetworks.wordpress.com/) 
+- Archaeological network research tutorials by Tom Brughmans (https://archaeologicalnetworks.wordpress.com/) 
 - The Vistorian tutorial
 - Visone tutorial
 - Cytoscape tutorial
 - Netlogo tutorial
 
-GEPHI - Introduction to Network Analysis and Visualization, Gephi tutorial by Martin Grandjean (with video https://www.martingrandjean.ch/gephi-introduction/) 
+- GEPHI - Introduction to Network Analysis and Visualization, Gephi tutorial by Martin Grandjean (with video https://www.martingrandjean.ch/gephi-introduction/) 
 
-Interactive explorable explanations of network concepts:
+- Interactive explorable explanations of network concepts:
 - The wisdom and/or madness of crowds (about alcohol consumption) (https://ncase.me/crowds/)
 - Cats VS dogs (https://vis.csh.ac.at/planets-of-disparity/)
 - Transmission of viruses through social networks (about COVID) (http://www.r2d3.us/covid-19/)
@@ -825,11 +826,11 @@ Interactive explorable explanations of network concepts:
 
 ### Data
 
-All datasets from the Cambridge Manual of Network Science in Archaeology (https://book.archnetworks.net/dataandworkspace) 
+- All datasets from the Cambridge Manual of Network Science in Archaeology (https://book.archnetworks.net/dataandworkspace) 
 - “Intellectual Cooperation”, a network dataset based on Martin’s archives (https://github.com/grandjeanmartin/intellectual-cooperation) 
 - “Moreno’s Sociograms”, a series of small datasets to remake the famous sociograms of 1934 (https://github.com/grandjeanmartin/sociograms) 
 - Open datasets in Roman Studies (https://projectmercury.eu/datasets/) 
-Netzschleuder: a (non-historical) network dataset repository (more than 100k networks https://networks.skewed.de/) 
+- Netzschleuder: a (non-historical) network dataset repository (more than 100k networks https://networks.skewed.de/) 
 
 ### Literature
 
