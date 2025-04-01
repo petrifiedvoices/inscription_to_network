@@ -708,5 +708,129 @@ For more resources and practical exercises in SNA in historical and archaeologic
 
 The online appendix and exercises are available via https://archnetworks.net/
 
+## Resources by The Barcelona Past Networks Summer School community https://www.pastnetworks.net/ 
+
+### Conferences
+#### Past Networks
+
+Connected Past (https://connectedpast.net/)
+
+The Historical Network Research Conference (https://historicalnetworkresearch.org/hnr-events/; 2024: https://historicalnetworkresearch.github.io/lausanne/) 
+
+#### Network science and complex systems
+
+Conference on Complex Systems (https://cssociety.org/ccs)
+NetSci and NetSci-X (https://netscisociety.net/home)
+
+#### Social Network analysis
+
+INSNA Sunbelt Conference (https://www.insna.org/)
+
+European Social Network Conference – EUSN (https://www.insna.org/european-conference-of-social-networks-eusn)
+
+International Conference on Computational Social Science (https://ic2s2.org/)
+
+#### Digital Humanities:
+
+Computational Humanities Research (2024: https://2024.computational-humanities-research.org/cfp/) 
+
+Digital Humanities Conference (https://adho.org/conference/)
+
+Computer Applications in Archaeology (https://caa-international.org/)
+Journals
+
+The Journal of Historical Network Research (https://jhnr.net/)
+
+Digital Scholarship in the Humanities (https://academic.oup.com/dsh) 
+
+Social Networks (https://www.sciencedirect.com/journal/social-networks)
+
+Journal of Computer Applications in Archaeology (https://journal.caa-international.org/) 
+
+Journal of Digital History (https://journalofdigitalhistory.org/)
+
+Redes (https://revistes.uab.cat/redes) 
+
+### Tutorials
+
+Online resources for The Cambridge Manual of Network Science in Archaeology: includes exhaustive tutorials in R on all aspects of past network research (https://book.archnetworks.net/) 
+- Uncertainty in networks
+- Spatial networks
+- ERGMs
+- Spatial interaction models
+- Affiliation networks
+- Network diffusion
+- Comparing networks
+
+Dozens of tutorials are listed in the HNR website  (https://historicalnetworkresearch.org/external-resources/) 
+
+Archaeological network data and network analysis scripts by Matt Peeples:  (https://mattpeeples.net/data-and-software/)
+
+Archaeological network research tutorials by Tom Brughmans (https://archaeologicalnetworks.wordpress.com/) 
+- The Vistorian tutorial
+- Visone tutorial
+- Cytoscape tutorial
+- Netlogo tutorial
+
+GEPHI - Introduction to Network Analysis and Visualization, Gephi tutorial by Martin Grandjean (with video ▶️https://www.martingrandjean.ch/gephi-introduction/) 
+
+Interactive explorable explanations of network concepts:
+The wisdom and/or madness of crowds (about alcohol consumption)
+(https://ncase.me/crowds/)
+- Cats VS dogs (https://vis.csh.ac.at/planets-of-disparity/)
+- Transmission of viruses through social networks (about COVID)
+(http://www.r2d3.us/covid-19/)
+- An introduction class to graph theory (maths)
+(https://d3gt.com) 
+- From Hermeneutics to Data to Networks Data Extraction and Network Visualization of Historical Sources, lesson by Marten Düring in Programming Historian (https://programminghistorian.org/en/lessons/creating-network-diagrams-from-historical-sources) 
+
+### Tools
+- R (https://www.r-project.org/)
+- R Studio (https://posit.co/products/open-source/rstudio/)
+- igraph (https://r.igraph.org/)
+- ggplot2 (https://ggplot2.tidyverse.org/)
+- Gephi (https://gephi.org/)
+- Blog (https://gephi.wordpress.com/)
+- Nodegoat (https://nodegoat.net/)
+- Vistorian (https://vistorian.github.io/vistorian/) 
+- Python (https://www.python.org/) 
+
+### Communities
+The Barcelona Past Networks Summer School (https://www.pastnetworks.net/ )
+
+The Historical Network Research Community (https://historicalnetworkresearch.org/)
+
+The Connected Past (https://connectedpast.net/)
+
+Computer applications in archaeology (https://caa-international.org/)
+
+Réseaux et Histoire (https://reshist.hypotheses.org/)
+
+Complexitat.cat (https://complexitat.cat/)
+
+Alliance of digital humanities organisations (https://adho.org/)
+
+### Data
+All datasets from the Cambridge Manual of Network Science in Archaeology (https://book.archnetworks.net/dataandworkspace) 
+- “Intellectual Cooperation”, a network dataset based on Martin’s archives (https://github.com/grandjeanmartin/intellectual-cooperation) 
+- “Moreno’s Sociograms”, a series of small datasets to remake the famous sociograms of 1934 (https://github.com/grandjeanmartin/sociograms) 
+- Open datasets in Roman Studies (https://projectmercury.eu/datasets/) 
+Netzschleuder: a (non-historical) network dataset repository (more than 100k networks https://networks.skewed.de/) 
+
+### Literature
+- Exhaustive bibliography on HNR Zotero (https://www.zotero.org/groups/209983/historical_network_research) 
+- All archaeological networks Zotero bibliography (https://www.zotero.org/groups/824994/archaeologicalnetworks) 
+- Network Science in Archaeology by Tom Brughmans and Matthew A. Peeples (2023)(https://book.archnetworks.net/) 
+
+### Other links
+- The Digital Humanities Literacy Guidebook: with links to many educational resources (https://cmu-lib.github.io/dhlg/) 
+- Introduction to Social Network Analysis: Basics and Historical Specificities, video series ▶️by Martin Grandjean for HNR (https://www.martingrandjean.ch/introduction-to-social-network-analysis/) 
+- Free open manual in network science by Michele Coscia (https://www.networkatlas.eu/) 
+- “Translating Networks”, a short conference paper by Martin Grandjean and Mathieu Jacomy (Gephi creator) which discusses how to "translate" measures of centrality into the language of the humanities and social sciences. See in particular the appendix, which contains a long list of interpretation scenarios. (https://shs.hal.science/halshs-02179024v1/document) 
+- “Intersubjective Networks”, a funny experiment with videos ▶️by Martin Grandjean and Mathieu Jacomy to see if two researchers with the same network dataset would “see” the same thing (https://intersubjective-networks.github.io/dh2022/) 
+- The HNR YouTube channel, with video recordings ▶️of online lectures (https://www.youtube.com/@HistoricalNetworkResearch) 
+
+
+
 
 
