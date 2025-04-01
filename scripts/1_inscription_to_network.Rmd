@@ -13,9 +13,20 @@ output:
     toc_depth: 3
     df_print: paged
 ---
-_Event: Epigraphy.info IX, 2-4 April 2025, Aarhus, Denmark. See https://epigraphy.info/workshop_9/ for details._
 
-This script demonstrates how to convert people and their relationships from Latin inscriptions into a network representation.
+___
+
+__This script demonstrates how to convert people and their relationships from Latin inscriptions into a network representation.__
+
+_Event_: **Epigraphy.info IX**, 2-4 April 2025, Aarhus, Denmark. See [https://epigraphy.info/workshop_9/](https://epigraphy.info/workshop_9/) for details.
+
+_DISCLAIMER_: Some code chunks in this script were generated using GenAI (Claude 3.7, free version). The workshop design, the conceptualisation, and the used data were not created by GenAI, but by the authors. The relevant sources of the data, including the text edition and version of metadata of used inscriptions is specified for individual case studies in their respective section. Authors do not claim the authorship of the original epigraphic data, but any errors in the process of identification of individuals and relationships between them can be attributed solely to the authors.
+
+_Authorship declaration_: data selection and curation [PH], execution of code [PH], conceptualisation [PH, TB], delivery [PH, TB], visualisation [PH], theoretical background and additional resources [TB]
+
+
+___
+
 
 # Initial setup
 
@@ -202,6 +213,8 @@ plot(inscription_network,
 
 ```
 
+**Food for thought**: Try to run the code again and observe how the visualisation has changed. Why is that so? What does it say about the visualisation?
+
 ## Step 5: Advanced visualization with ggraph
 
 ```{r}
@@ -261,9 +274,7 @@ custom_layout <- matrix(c(
 ), ncol = 2, byrow = TRUE)
 
 # Plot the graph
-png("../images/PubliusLiviusMacer_roman_family_tree.png", width = 1200, height = 800,
-    res = 100
-    )
+
 plot(g, layout = custom_layout,
      edge.label = E(g)$relationship,
      edge.label.dist = 1,
@@ -287,9 +298,15 @@ legend("bottomleft",
        pch = c(NA, NA, 15, 15, 15),
        cex = 0.8,
        bg = "white")
+
+
+```
+```{r}
+#saving as PNG image into image folder
+
+png("../images/PubliusLiviusMacer_roman_family_tree.png", width = 1200, height = 800, res = 100)
 ```
 
-![Visualisation](../images/PubliusLiviusMacer_roman_family_tree.png)
 
 ## Hands-on - add missing poeple and relationships
 
@@ -376,9 +393,7 @@ custom_layout <- matrix(c(
 ), ncol = 2, byrow = TRUE)
 
 # Plot the graph
-png("../images/PubliusLiviusMacer_roman_family_tree_updated.png", width = 1200, height = 800,
-    res = 100
-    )
+
 plot(g, layout = custom_layout,
      edge.label = E(g2)$relationship,
      edge.label.dist = 1,
@@ -406,9 +421,18 @@ legend("bottomleft",
 
 ```
 
+```{r}
+# save as image
+png("../images/PubliusLiviusMacer_roman_family_tree_updated.png", width = 1200, height = 800, res = 100)
+```
+
+
 Compare your new visualisation with the old one. Are you happy with the result? If not, go back to the data or the code and adjust accordingly.
 
-![Visualisation](../imaPubliusLiviusMacer_roman_family_tree_updated.png)
+```{r, echo=FALSE, out.width="100%", fig.align="center"}
+knitr::include_graphics("../images/PubliusLiviusMacer_roman_family_tree.png")
+knitr::include_graphics("../images/PubliusLiviusMacer_roman_family_tree_updated.png")
+```
 
 ### Exercise 2 (Advanced): Reconstruct the inferred people and relationships
 
@@ -434,11 +458,12 @@ Once you have identified the people and their relationships, you can add them an
 Most of the Clodii family derives from A. Clodius M. f., tribe Palatina, who might have come from Rome or Puteoli (Castren 1975, 154). After his marriage to the faimly of the Lassii, who were wine producers, he and his decendants engaged mainly in specialized agriculture and wine production (vinum Clodianum).
 
 **References:** 
+
 - Wim Broekart, 2020. The Pompeian Connection: A Social Network Approach to Elites
 and Sub-Elites in the Bay of Naples https://jhnr.net/articles/25/files/653f546ab5567.pdf
 - Paavo Castren 1975, Ordo populusque Pompeianus: polity and society in Roman Pompeii https://archive.org/details/ordopopulusquepo0008cast
 
-I have manually created the list of 54 people and their relationships, based on the information from 21 inscriptions, that we will now turn into a network, visualise and analyse.
+I [Petra] have manually created the list of 54 people and their relationships, based on the information from 21 inscriptions, that we will now turn into a network, visualise and analyse.
 
 ## Datasets
 ```{r}
@@ -474,8 +499,6 @@ par(mar = c(0, 0, 2, 0))  # Adjust margins for better visualization
 V(g)$color <- ifelse(V(g)$generation == 1, "tan", 
                    ifelse(V(g)$generation == 2, "lightgreen", "lightblue"))
 
-png("../images/ClodiusFamily.png", width = 1200, height = 800,
-    res = 100 )
 # Plot the network
 plot(inscription_network3, 
      vertex.label = V(inscription_network3)$name,
@@ -504,7 +527,11 @@ legend("bottomleft", title="Date",
 
 ```
 
-![Visualisation](../images/ClodiusFamily.png)
+```{r}
+# save image
+png("../images/ClodiusFamily.png", width = 1200, height = 800, res = 100 )
+```
+
 
 ## Basic network analytics
 
@@ -632,8 +659,6 @@ par(mar = c(0, 0, 2, 0))  # Adjust margins for better visualization
 V(g)$color <- ifelse(V(g)$generation == 1, "tan", 
                    ifelse(V(g)$generation == 2, "lightgreen", "lightblue"))
 
-png("../images/ClodiusFamily_hypothetical.png", width = 1200, height = 800,
-    res = 100 )
 # Plot the network
 plot(inscription_network4, 
      vertex.label = V(inscription_network4)$name,
@@ -660,6 +685,11 @@ legend("bottomleft", title="Date",
        cex = 0.8,
        bg = "white")
 
+```
+
+```{r}
+# save image
+png("../images/ClodiusFamily_hypothetical.png", width = 1200, height = 800, res = 100 )
 ```
 
 Now, let's compare both networks:
@@ -713,43 +743,33 @@ The online appendix and exercises are available via https://archnetworks.net/
 ### Conferences
 #### Past Networks
 
-Connected Past (https://connectedpast.net/)
-
-The Historical Network Research Conference (https://historicalnetworkresearch.org/hnr-events/; 2024: https://historicalnetworkresearch.github.io/lausanne/) 
+- Connected Past (https://connectedpast.net/)
+- The Historical Network Research Conference (https://historicalnetworkresearch.org/hnr-events/; 2024:  https://historicalnetworkresearch.github.io/lausanne/) 
 
 #### Network science and complex systems
 
-Conference on Complex Systems (https://cssociety.org/ccs)
-NetSci and NetSci-X (https://netscisociety.net/home)
+- Conference on Complex Systems (https://cssociety.org/ccs)
+- NetSci and NetSci-X (https://netscisociety.net/home)
 
 #### Social Network analysis
 
-INSNA Sunbelt Conference (https://www.insna.org/)
+- INSNA Sunbelt Conference (https://www.insna.org/)
+- European Social Network Conference – EUSN (https://www.insna.org/european-conference-of-social-networks-eusn)
+- International Conference on Computational Social Science (https://ic2s2.org/)
 
-European Social Network Conference – EUSN (https://www.insna.org/european-conference-of-social-networks-eusn)
+#### Digital Humanities
 
-International Conference on Computational Social Science (https://ic2s2.org/)
+- Computational Humanities Research (2024: https://2024.computational-humanities-research.org/cfp/) 
+- Digital Humanities Conference (https://adho.org/conference/)
+- Computer Applications in Archaeology (https://caa-international.org/)
 
-#### Digital Humanities:
-
-Computational Humanities Research (2024: https://2024.computational-humanities-research.org/cfp/) 
-
-Digital Humanities Conference (https://adho.org/conference/)
-
-Computer Applications in Archaeology (https://caa-international.org/)
-Journals
-
-The Journal of Historical Network Research (https://jhnr.net/)
-
-Digital Scholarship in the Humanities (https://academic.oup.com/dsh) 
-
-Social Networks (https://www.sciencedirect.com/journal/social-networks)
-
-Journal of Computer Applications in Archaeology (https://journal.caa-international.org/) 
-
-Journal of Digital History (https://journalofdigitalhistory.org/)
-
-Redes (https://revistes.uab.cat/redes) 
+###Journals
+- The Journal of Historical Network Research (https://jhnr.net/)
+- Digital Scholarship in the Humanities (https://academic.oup.com/dsh) 
+- Social Networks (https://www.sciencedirect.com/journal/social-networks)
+- Journal of Computer Applications in Archaeology (https://journal.caa-international.org/) 
+- Journal of Digital History (https://journalofdigitalhistory.org/)
+- Redes (https://revistes.uab.cat/redes) 
 
 ### Tutorials
 
@@ -772,19 +792,17 @@ Archaeological network research tutorials by Tom Brughmans (https://archaeologic
 - Cytoscape tutorial
 - Netlogo tutorial
 
-GEPHI - Introduction to Network Analysis and Visualization, Gephi tutorial by Martin Grandjean (with video ▶️https://www.martingrandjean.ch/gephi-introduction/) 
+GEPHI - Introduction to Network Analysis and Visualization, Gephi tutorial by Martin Grandjean (with video https://www.martingrandjean.ch/gephi-introduction/) 
 
 Interactive explorable explanations of network concepts:
-The wisdom and/or madness of crowds (about alcohol consumption)
-(https://ncase.me/crowds/)
+- The wisdom and/or madness of crowds (about alcohol consumption) (https://ncase.me/crowds/)
 - Cats VS dogs (https://vis.csh.ac.at/planets-of-disparity/)
-- Transmission of viruses through social networks (about COVID)
-(http://www.r2d3.us/covid-19/)
-- An introduction class to graph theory (maths)
-(https://d3gt.com) 
+- Transmission of viruses through social networks (about COVID) (http://www.r2d3.us/covid-19/)
+- An introduction class to graph theory (maths) (https://d3gt.com) 
 - From Hermeneutics to Data to Networks Data Extraction and Network Visualization of Historical Sources, lesson by Marten Düring in Programming Historian (https://programminghistorian.org/en/lessons/creating-network-diagrams-from-historical-sources) 
 
 ### Tools
+
 - R (https://www.r-project.org/)
 - R Studio (https://posit.co/products/open-source/rstudio/)
 - igraph (https://r.igraph.org/)
@@ -796,21 +814,17 @@ The wisdom and/or madness of crowds (about alcohol consumption)
 - Python (https://www.python.org/) 
 
 ### Communities
-The Barcelona Past Networks Summer School (https://www.pastnetworks.net/ )
 
-The Historical Network Research Community (https://historicalnetworkresearch.org/)
-
-The Connected Past (https://connectedpast.net/)
-
-Computer applications in archaeology (https://caa-international.org/)
-
-Réseaux et Histoire (https://reshist.hypotheses.org/)
-
-Complexitat.cat (https://complexitat.cat/)
-
-Alliance of digital humanities organisations (https://adho.org/)
+- The Barcelona Past Networks Summer School (https://www.pastnetworks.net/ )
+- The Historical Network Research Community (https://historicalnetworkresearch.org/)
+- The Connected Past (https://connectedpast.net/)
+- Computer applications in archaeology (https://caa-international.org/)
+- Réseaux et Histoire (https://reshist.hypotheses.org/)
+- Complexitat.cat (https://complexitat.cat/)
+- Alliance of digital humanities organisations (https://adho.org/)
 
 ### Data
+
 All datasets from the Cambridge Manual of Network Science in Archaeology (https://book.archnetworks.net/dataandworkspace) 
 - “Intellectual Cooperation”, a network dataset based on Martin’s archives (https://github.com/grandjeanmartin/intellectual-cooperation) 
 - “Moreno’s Sociograms”, a series of small datasets to remake the famous sociograms of 1934 (https://github.com/grandjeanmartin/sociograms) 
@@ -818,11 +832,13 @@ All datasets from the Cambridge Manual of Network Science in Archaeology (https:
 Netzschleuder: a (non-historical) network dataset repository (more than 100k networks https://networks.skewed.de/) 
 
 ### Literature
+
 - Exhaustive bibliography on HNR Zotero (https://www.zotero.org/groups/209983/historical_network_research) 
 - All archaeological networks Zotero bibliography (https://www.zotero.org/groups/824994/archaeologicalnetworks) 
 - Network Science in Archaeology by Tom Brughmans and Matthew A. Peeples (2023)(https://book.archnetworks.net/) 
 
 ### Other links
+
 - The Digital Humanities Literacy Guidebook: with links to many educational resources (https://cmu-lib.github.io/dhlg/) 
 - Introduction to Social Network Analysis: Basics and Historical Specificities, video series ▶️by Martin Grandjean for HNR (https://www.martingrandjean.ch/introduction-to-social-network-analysis/) 
 - Free open manual in network science by Michele Coscia (https://www.networkatlas.eu/) 
