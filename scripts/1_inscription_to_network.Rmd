@@ -394,7 +394,7 @@ custom_layout <- matrix(c(
 
 # Plot the graph
 
-plot(g, layout = custom_layout,
+plot(g2, layout = custom_layout,
      edge.label = E(g2)$relationship,
      edge.label.dist = 1,
      edge.label.cex = 0.6,
